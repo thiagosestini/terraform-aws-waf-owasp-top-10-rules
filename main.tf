@@ -224,7 +224,7 @@ resource "aws_wafregional_xss_match_set" "owasp_03_xss_set" {
 }
 
 resource "aws_wafregional_rule" "owasp_03_xss_rule" {
-  depends_on = ["aws_wafregional_xss_match_set.owasp_03_xss_set","aws_waf_byte_match_set.xsswhitelist"]
+  depends_on = ["aws_wafregional_xss_match_set.owasp_03_xss_set","aws_wafregional_byte_match_set.xsswhitelist"]
 
   count = "${lower(var.target_scope) == "regional" ? "1" : "0"}"
 
@@ -238,7 +238,7 @@ resource "aws_wafregional_rule" "owasp_03_xss_rule" {
   }
 
   predicate {
-    data_id = aws_waf_byte_match_set.xsswhitelist.0.id
+    data_id = aws_wafregional_byte_match_set.xsswhitelist.0.id
     negated = "true"
     type    = "ByteMatch"
   }    
@@ -1625,7 +1625,7 @@ resource "aws_waf_byte_match_set" "xsswhitelist" {
 
     content {
       text_transformation   = "URL_DECODE"
-      target_string         = whitelisted_source.0.value
+      target_string         = whitelisted_source.value
       positional_constraint = "EXACTLY"
 
       field_to_match {
@@ -1646,7 +1646,7 @@ resource "aws_wafregional_byte_match_set" "xsswhitelist" {
 
     content {
       text_transformation   = "URL_DECODE"
-      target_string         = whitelisted_source.0.value
+      target_string         = whitelisted_source.value
       positional_constraint = "EXACTLY"
 
       field_to_match {
