@@ -64,3 +64,9 @@ variable "csrf_expected_size" {
   description = "The size in bytes of the CSRF token value. For example if it's a canonically formatted UUIDv4 value the expected size would be 36 bytes/ASCII characters."
   default     = "36"
 }
+
+variable "xss_whitelist" {
+  type        = "list"
+  description = "A list of trusted source domains that should not be blocked by the XSS filter"
+  default     = null
+}

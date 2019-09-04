@@ -21,4 +21,5 @@ module "owasp_top_10" {
   max_expected_cookie_size       = "4093"
   csrf_expected_header           = "x-csrf-token"
   csrf_expected_size             = "36"
+  xss_whitelist                  = []
 }

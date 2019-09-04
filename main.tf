@@ -236,6 +236,12 @@ resource "aws_wafregional_rule" "owasp_03_xss_rule" {
     negated = "false"
     type    = "XssMatch"
   }
+
+  predicate {
+    data_id = aws_waf_byte_match_set.xsswhitelist.id
+    negated = "true"
+    type    = "ByteMatch"
+  }    
 }
 
 ## OWASP Top 10 A4
@@ -1031,6 +1037,12 @@ resource "aws_waf_rule" "owasp_03_xss_rule" {
     negated = "false"
     type    = "XssMatch"
   }
+
+  predicates {
+    data_id = aws_waf_byte_match_set.xsswhitelist.id
+    negated = "true"
+    type    = "ByteMatch"
+  }  
 }
 
 ## OWASP Top 10 A4
@@ -1597,5 +1609,28 @@ resource "aws_waf_rule_group" "owasp_top_10" {
     priority = "8"
     rule_id  = "${aws_waf_rule.owasp_09_server_side_include_rule.0.id}"
     type     = "REGULAR"
+  }
+}
+
+## Whitelist
+### Matches sources that should not be blocked by XSS Filter
+
+resource "aws_waf_byte_match_set" "xsswhitelist" {
+  name = "${lower(var.service_name)}-XSSWhitelist-${random_id.this.0.hex}"
+  
+  dynamic "byte_match_tuples" {
+    for_each = var.xss_whitelist == null ? [] : var.xss_whitelist
+    iterator = whitelisted_source
+
+    content {
+      text_transformation   = "URL_DECODE"
+      target_string         = whitelisted_source.value
+      positional_constraint = "EXACTLY"
+
+      field_to_match {
+        type = "HEADER"
+        data = "Host"
+      }
+    }
   }
 }
