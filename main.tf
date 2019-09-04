@@ -238,7 +238,7 @@ resource "aws_wafregional_rule" "owasp_03_xss_rule" {
   }
 
   predicate {
-    data_id = aws_waf_byte_match_set.xsswhitelist.id
+    data_id = aws_waf_byte_match_set.xsswhitelist.0.id
     negated = "true"
     type    = "ByteMatch"
   }    
@@ -1039,7 +1039,7 @@ resource "aws_waf_rule" "owasp_03_xss_rule" {
   }
 
   predicates {
-    data_id = aws_waf_byte_match_set.xsswhitelist.id
+    data_id = aws_waf_byte_match_set.xsswhitelist.0.id
     negated = "true"
     type    = "ByteMatch"
   }  
@@ -1617,14 +1617,15 @@ resource "aws_waf_rule_group" "owasp_top_10" {
 
 resource "aws_waf_byte_match_set" "xsswhitelist" {
   name = "${lower(var.service_name)}-XSSWhitelist-${random_id.this.0.hex}"
-  
+  count = "${lower(var.target_scope) == "global" ? "1" : "0"}"
+
   dynamic "byte_match_tuples" {
     for_each = var.xss_whitelist == null ? [] : var.xss_whitelist
     iterator = whitelisted_source
 
     content {
       text_transformation   = "URL_DECODE"
-      target_string         = whitelisted_source.value
+      target_string         = whitelisted_source.0.value
       positional_constraint = "EXACTLY"
 
       field_to_match {
@@ -1633,4 +1634,25 @@ resource "aws_waf_byte_match_set" "xsswhitelist" {
       }
     }
   }
+}
+
+resource "aws_wafregional_byte_match_set" "xsswhitelist" {
+  name = "${lower(var.service_name)}-XSSWhitelist-${random_id.this.0.hex}"
+  count = "${lower(var.target_scope) == "regional" ? "1" : "0"}"
+
+  dynamic "byte_match_tuples" {
+    for_each = var.xss_whitelist == null ? [] : var.xss_whitelist
+    iterator = whitelisted_source
+
+    content {
+      text_transformation   = "URL_DECODE"
+      target_string         = whitelisted_source.0.value
+      positional_constraint = "EXACTLY"
+
+      field_to_match {
+        type = "HEADER"
+        data = "Host"
+      }
+    }
+  }  
 }
