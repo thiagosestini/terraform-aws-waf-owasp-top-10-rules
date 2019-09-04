@@ -224,7 +224,7 @@ resource "aws_wafregional_xss_match_set" "owasp_03_xss_set" {
 }
 
 resource "aws_wafregional_rule" "owasp_03_xss_rule" {
-  depends_on = ["aws_wafregional_xss_match_set.owasp_03_xss_set"]
+  depends_on = ["aws_wafregional_xss_match_set.owasp_03_xss_set","aws_waf_byte_match_set.xsswhitelist"]
 
   count = "${lower(var.target_scope) == "regional" ? "1" : "0"}"
 
@@ -1025,7 +1025,7 @@ resource "aws_waf_xss_match_set" "owasp_03_xss_set" {
 }
 
 resource "aws_waf_rule" "owasp_03_xss_rule" {
-  depends_on = ["aws_waf_xss_match_set.owasp_03_xss_set"]
+  depends_on = ["aws_waf_xss_match_set.owasp_03_xss_set","aws_waf_byte_match_set.xsswhitelist"]
 
   count = "${lower(var.target_scope) == "global" ? "1" : "0"}"
 
